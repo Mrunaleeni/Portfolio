@@ -72,17 +72,17 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
    * Determine the starting theme:
    * 1. Honour a previously saved preference (localStorage).
    * 2. Fall back to the OS colour-scheme preference.
-   * 3. Default to light.
+   * 3. Default to DARK (matches aaditya.vercel.app style).
    */
   function getInitialTheme() {
     const saved = localStorage.getItem(THEME_KEY);
     if (saved === DARK || saved === LIGHT) return saved;
 
-    // Check OS preference
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return DARK;
+    // Check OS preference — only override to light if explicitly set
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return LIGHT;
     }
-    return LIGHT;
+    return DARK;
   }
 
   // Apply on load
@@ -96,11 +96,10 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
     localStorage.setItem(THEME_KEY, next);
   });
 
-  // React to OS-level changes (e.g. user switches system dark mode)
-  // Only if the user hasn't explicitly chosen a theme themselves.
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  // React to OS-level changes only if user hasn't explicitly chosen
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
     if (!localStorage.getItem(THEME_KEY)) {
-      applyTheme(e.matches ? DARK : LIGHT);
+      applyTheme(e.matches ? LIGHT : DARK);
     }
   });
 })();
